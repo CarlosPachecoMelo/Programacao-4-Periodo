@@ -1,38 +1,34 @@
 package botelegram;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.UpdatesListener;
-import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.GetUpdates;
-import com.pengrad.telegrambot.response.GetUpdatesResponse;
+import com.pengrad.telegrambot.request.SendMessage;
 import interacaobot.Bot;
-import java.util.List;
-
+import static spark.Spark.post;
+import static spark.Spark.port;
+import com.pengrad.telegrambot.request.SetWebhook;
+import static spark.Spark.*;
+        
 public class BotTelegram implements Bot{
     
     TelegramBot bot;
-    GetUpdates updates;
+    EventosTelegram eventosTelegram;
     
     @Override
     public boolean entrar(String token) {
-        bot = new TelegramBot(token);
+        eventosTelegram = new EventosTelegram(token);
+
+        this.bot = eventosTelegram.getBot();
         
-        Update update = new Update();
-        updates = new GetUpdates().limit(10).offset(0).timeout(0);
-        GetUpdatesResponse updatesResponse = bot.execute(updates);
-        List<Update> listUpdates = updatesResponse.updates();
+        ipAddress("149.154.167.50");
+        port(443);
         
-        Message message = update.message();
-        
-        bot.setUpdatesListener (new UpdatesListener(){
-            @Override
-            public int process(List<Update> updates){
-                
-                
-                return UpdatesListener.CONFIRMED_UPDATES_ALL;
-            }
-        });
+        get("/hello", (req, res) -> "Hello World");
+
+        eventosTelegram = new EventosTelegram(token);
+        post("/" + eventosTelegram.getToken(), eventosTelegram);
+
+        String appSite = System.getenv("OPENSHIFT_APP_DNS");
+        eventosTelegram.getBot().execute(new SetWebhook().url(appSite + "/" + eventosTelegram.getToken()));
         
         if(bot != null){
             return true;
@@ -42,18 +38,14 @@ public class BotTelegram implements Bot{
     }
 
     
-    
-    
     @Override
     public void enviaMensagem(String mensagem) {
-        
-        bot.execute(null);
-        
+        bot.execute(new SendMessage(eventosTelegram.lastChatID, mensagem));
     }
 
     @Override
     public void sair() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println("Função não suportada pela API!");
     }
     
 }
