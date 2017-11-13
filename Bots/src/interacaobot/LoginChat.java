@@ -6,8 +6,8 @@ public class LoginChat extends javax.swing.JFrame {
 
     Bot bot;
     
-    final String token = "MzcyODU4NzA2OTA1NTMwMzc4.DNWFAQ.Zvf9HYSarTX4LDBxI3lGKsr5H7Q";
-    final String LOGIN = "Logado no ";
+    private String token;
+    private final String LOGIN = "Logado no ";
     
     public LoginChat() {
         
@@ -15,6 +15,15 @@ public class LoginChat extends javax.swing.JFrame {
         
         botaoLogar.addActionListener((e)->{
             bot = BotFactory.createBot(ServicoMensagens.getSelectedItem().toString());
+            
+            if(ServicoMensagens.getSelectedItem().toString().equals("Discord")){
+                token = "MzcyODU4NzA2OTA1NTMwMzc4.DNWFAQ.Zvf9HYSarTX4LDBxI3lGKsr5H7Q";
+            }else if(ServicoMensagens.getSelectedItem().toString().equals("Telegram")){
+                token = "484826133:AAG41aXUTAr_y99z8UvCAGJwrPab2O1KOwc";
+            }else if(ServicoMensagens.getSelectedItem().toString().equals("Facebook")){
+                token = "";
+            }
+            
             if(bot.entrar(token)){
                 setVisible(false);
                 JOptionPane.showMessageDialog(this, LOGIN + ServicoMensagens.getSelectedItem().toString() + "!");
